@@ -33,9 +33,9 @@ export default function CustomerMenu({ restaurant, menuItems, tableId }: any) {
     const getQty = (menuItemId: string) => items.find(i => i.itemId === menuItemId)?.quantity || 0;
 
     // 1. Extract Categories
-    const categories = useMemo(() => {
+    const categories: string[] = useMemo(() => {
         const cats = new Set(menuItems.map((i: MenuItem) => i.category || 'Mains'));
-        return ['All', ...Array.from(cats)];
+        return ['All', ...Array.from(cats)] as string[];
     }, [menuItems]);
 
     // 2. Filter Items
@@ -86,7 +86,7 @@ export default function CustomerMenu({ restaurant, menuItems, tableId }: any) {
 
                     {/* Category Pills */}
                     <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar mask-linear">
-                        {categories.map(cat => (
+                        {categories.map((cat: string) => (
                             <button
                                 key={cat}
                                 onClick={() => setActiveCategory(cat)}

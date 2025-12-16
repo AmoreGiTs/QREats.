@@ -49,9 +49,33 @@ export default function proxy(request: NextRequest) {
     // The snippet provided: "const response = NextResponse.next(); response.headers.set..."
     // Since we are rewriting, we can apply headers to the rewrite response object.
 
-    rwResponse.headers.set('X-Frame-Options', 'DENY');
-    rwResponse.headers.set('X-Content-Type-Options', 'nosniff');
-    rwResponse.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+    // Security Headers
+    const csp = `
+        default-src 'self';
+        script-src 'self' 'unsafe-eval' 'unsafe-inline' https://vercel.live;
+        style-src 'self' 'unsafe-inline';
+        img-src 'self' blob: data: https://images.unsplash.com;
+        font-src 'self';
+        object-src 'none';
+        base-uri 'self';
+        form-action 'self';
+        frame-ancestors 'none';
+        upgrade-insecure-requests;
+    `.replace(/\s{2,}/g, ' ').trim();
+
+    const headers = {
+        'X-Frame-Options': 'DENY',
+        'X-Content-Type-Options': 'nosniff',
+        'Referrer-Policy': 'strict-origin-when-cross-origin',
+        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+        'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
+        'Content-Security-Policy': csp,
+        'X-DNS-Prefetch-Control': 'off'
+    };
+
+    Object.entries(headers).forEach(([key, value]) => {
+        rwResponse.headers.set(key, value);
+    });
 
     return rwResponse;
 }
