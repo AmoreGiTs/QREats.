@@ -65,6 +65,13 @@ model MenuItem {
   restaurantId  String
   restaurant    Restaurant @relation(fields: [restaurantId], references: [id])
   
+  // Advanced Menu Fields
+  category      String   @default("Mains")
+  description   String?
+  imageUrl      String?
+  isAvailable   Boolean  @default(true)
+  dietaryInfo   String?  // Comma separated tags: VEG, SPICY, GF
+
   recipe        Recipe[]
   orderItems    OrderItem[]
 }

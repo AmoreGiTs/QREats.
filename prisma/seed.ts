@@ -70,7 +70,11 @@ async function main() {
         data: {
             restaurantId: restaurant.id,
             name: 'Margherita Pizza',
+            description: 'Classic tomato and mozzarella with fresh basil',
             price: 15.00,
+            category: 'Mains',
+            imageUrl: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=800&q=80',
+            dietaryInfo: 'VEG',
             recipe: {
                 create: [
                     {
@@ -84,6 +88,18 @@ async function main() {
                 ],
             },
         },
+    });
+
+    const coke = await prisma.menuItem.create({
+        data: {
+            restaurantId: restaurant.id,
+            name: 'Coca Cola',
+            description: 'Ice cold classic',
+            price: 3.00,
+            category: 'Drinks',
+            imageUrl: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=800&q=80',
+            dietaryInfo: 'GF',
+        }
     });
 
     console.log('Menu Item created:', pizza.name);
