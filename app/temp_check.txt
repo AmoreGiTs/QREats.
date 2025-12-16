@@ -1,0 +1,49 @@
+'use client';
+
+import { ErrorBoundary } from 'react-error-boundary';
+import Link from 'next/link';
+import AdminDashboard from '@/components/admin/AdminDashboard'; // We'll move the dashboard here
+import { useParams } from 'next/navigation';
+
+function ErrorFallback({ error, resetErrorBoundary }: any) {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+      <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center">
+        <h2 className="text-xl font-bold text-gray-900 mb-2">Authentication Error</h2>
+        <p className="text-gray-500 mb-6 text-sm">{error.message}</p>
+        <Link 
+            href="/api/auth/reset?callbackUrl=/auth/login" 
+            className="block w-full bg-black text-white py-3 rounded-lg font-bold hover:bg-gray-800 transition-all"
+        >
+          Reset Session & Login
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+export default function AdminPageWrapper() {
+    const params = useParams();
+    const slug = params?.slug as string;
+
+    return (
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+            <AdminDashboardContent slug={slug} />
+        </ErrorBoundary>
+    );
+}
+
+import { useState, useEffect } from 'react';
+
+// This component fetches data. Since we are in a client component wrapper (for ErrorBoundary),
+// We need to fetch data differently or keep the page server-side and only wrap content.
+// Actually, strict ErrorBoundary usage in App Router is usually done via error.tsx file.
+// But following the user's snippet "AdminPageWrapper" inside page.tsx:
+// "AdminPageWrapper" -> "AdminPage" (Server Component)
+// You cannot import Server Component into Client Component.
+// So we must use error.tsx for the route instead of manual wrapping efficiently.
+// Or we follow the user's specific code structure if "AdminPage" was client.
+// The user's code showed "export default async function AdminPage".
+// Attempting to wrap an async Server Component in a Client Component ErrorBoundary directly in the same file is tricky.
+
+// BETTER FIX as per Next.js patterns: Create error.tsx in the admin folder.

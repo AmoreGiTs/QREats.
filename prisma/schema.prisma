@@ -1,0 +1,210 @@
+// schema.prisma
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Enums removed for SQLite compatibility
+
+model Restaurant {
+  id            String   @id @default(uuid())
+  name          String
+  slug          String   @unique // Subdomain
+  createdAt     DateTime @default(now())
+  
+  // Branding
+  primaryColor  String   @default("#000000")
+  logoUrl       String?
+
+  users         User[]
+  inventoryItems InventoryItem[]
+  orders        Order[]
+  menuItems     MenuItem[]
+  customers     Customer[]
+  auditLogs     AuditLog[]
+}
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  passwordHash  String?  // Nullable if OAuth only, but we use Credentials
+  name          String?
+  phone         String?
+  role          String   @default("WAITER") // OWNER, MANAGER, WAITER, CHEF, ADMIN
+  
+  restaurantId  String?
+  restaurant    Restaurant? @relation(fields: [restaurantId], references: [id])
+  
+  // Auth
+  image         String?
+  emailVerified DateTime?
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  sessions      Session[]
+  auditLogs     AuditLog[]
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expires      DateTime
+}
+
+model MenuItem {
+  id            String   @id @default(uuid())
+  name          String
+  price         Decimal
+  restaurantId  String
+  restaurant    Restaurant @relation(fields: [restaurantId], references: [id])
+  
+  recipe        Recipe[]
+  orderItems    OrderItem[]
+}
+
+model InventoryItem {
+  id            String   @id @default(uuid())
+  name          String
+  unit          String   // kg, liters, pcs
+  
+  restaurantId  String
+  restaurant    Restaurant @relation(fields: [restaurantId], references: [id])
+  
+  batches       InventoryBatch[]
+  transactions  InventoryTransaction[]
+  recipes       Recipe[]
+}
+
+model InventoryBatch {
+  id               String   @id @default(uuid())
+  inventoryItemId  String
+  inventoryItem    InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  
+  quantityInitial  Decimal
+  quantityRemaining Decimal
+  costPerUnit      Decimal
+  receivedAt       DateTime @default(now())
+  expirationDate   DateTime?
+
+  transactions     InventoryTransaction[]
+}
+
+model InventoryTransaction {
+  id               String   @id @default(uuid())
+  inventoryItemId  String
+  inventoryItem    InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  
+  batchId          String
+  batch            InventoryBatch @relation(fields: [batchId], references: [id])
+  
+  quantity         Decimal
+  type             String // InventoryTxType: DEDUCT, RESTOCK
+  
+  orderId          String?
+  refundId         String?
+  
+  createdAt        DateTime @default(now())
+}
+
+model Recipe {
+  id               String   @id @default(uuid())
+  menuItemId       String
+  menuItem         MenuItem @relation(fields: [menuItemId], references: [id])
+  
+  inventoryItemId  String
+  inventoryItem    InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  
+  quantityRequired Decimal
+}
+
+model Order {
+  id            String   @id @default(uuid())
+  restaurantId  String
+  restaurant    Restaurant @relation(fields: [restaurantId], references: [id])
+  
+  status        String   @default("PENDING") // OrderStatus
+  totalAmount   Decimal
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  items         OrderItem[]
+  refunds       Refund[]
+  payments      Payment[]
+}
+
+model OrderItem {
+  id            String   @id @default(uuid())
+  orderId       String
+  order         Order    @relation(fields: [orderId], references: [id])
+  
+  menuItemId    String
+  menuItem      MenuItem @relation(fields: [menuItemId], references: [id])
+  
+  quantity      Int
+  priceAtOrder  Decimal
+}
+
+model Refund {
+  id            String   @id @default(uuid())
+  orderId       String
+  order         Order    @relation(fields: [orderId], references: [id])
+  
+  amount        Decimal
+  reason        String?
+  createdAt     DateTime @default(now())
+}
+
+model Payment {
+  id            String   @id @default(uuid())
+  orderId       String
+  order         Order    @relation(fields: [orderId], references: [id])
+  amount        Decimal
+  currency      String   @default("KES")
+  method        String   // mpesa, cash, card
+  status        String   // pending, completed, failed, refunded
+  reference     String?  // MPesa transaction ID
+  metadata      String?  // JSON string
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Customer {
+  id            String   @id @default(uuid())
+  restaurantId  String
+  restaurant    Restaurant @relation(fields: [restaurantId], references: [id])
+  phone         String?
+  email         String?
+  name          String?
+  
+  // Loyalty
+  loyaltyPoints Int      @default(0)
+  visitsCount   Int      @default(0)
+  
+  createdAt     DateTime @default(now())
+  
+  @@unique([restaurantId, phone])
+  @@unique([restaurantId, email])
+}
+
+model AuditLog {
+  id            String   @id @default(uuid())
+  restaurantId  String
+  restaurant    Restaurant @relation(fields: [restaurantId], references: [id])
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id])
+  action        String   // CREATE, UPDATE, DELETE, LOGIN
+  entityType    String   // ORDER, INVENTORY, etc.
+  entityId      String?
+  changes       String?  // JSON string
+  
+  createdAt     DateTime @default(now())
+}
