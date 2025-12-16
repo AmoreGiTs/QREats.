@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import { useCart } from '@/lib/stores/cart-store';
 import { CheckoutSteps, CheckoutNavigation } from '@/components/customer/CheckoutSteps';
 import {
@@ -160,11 +161,15 @@ export default function CheckoutPage() {
                                             >
                                                 <div className="w-16 h-16 bg-restaurant-neutral-200 rounded-lg overflow-hidden shrink-0">
                                                     {item.image && (
-                                                        <img
-                                                            src={item.image}
-                                                            alt={item.name}
-                                                            className="w-full h-full object-cover"
-                                                        />
+                                                        <div className="relative w-full h-full">
+                                                            <Image
+                                                                src={item.image}
+                                                                alt={item.name}
+                                                                fill
+                                                                className="object-cover"
+                                                                sizes="64px"
+                                                            />
+                                                        </div>
                                                     )}
                                                 </div>
                                                 <div className="flex-1">

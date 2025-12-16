@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { Minus, Plus, Search, Filter, ShoppingBag, X } from 'lucide-react';
 import { CartDrawer } from './CartDrawer';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 
 type MenuItem = {
     id: string;
@@ -120,11 +121,12 @@ export default function CustomerMenu({ restaurant, menuItems, tableId }: any) {
                                         {/* Image (if exists) */}
                                         {(item.imageUrl || item.image) && (
                                             <div className="w-24 h-24 shrink-0 rounded-lg overflow-hidden bg-gray-100 relative">
-                                                {/* Use standard img for simplicity/robustness */}
-                                                <img
-                                                    src={item.imageUrl || item.image}
+                                                <Image
+                                                    src={item.imageUrl || item.image || ''}
                                                     alt={item.name}
-                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                                    fill
+                                                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                                    sizes="96px"
                                                 />
                                             </div>
                                         )}

@@ -2,17 +2,23 @@ import { cache } from 'react';
 import prisma from './db';
 import { notFound } from 'next/navigation';
 
-export const getRestaurantBySlug = cache(async (slug: string) => {
-    const restaurant = await prisma.restaurant.findUnique({
-        where: { slug },
-    });
+import { unstable_cache } from 'next/cache';
 
-    if (!restaurant) {
-        notFound();
-    }
+export const getRestaurantBySlug = unstable_cache(
+    async (slug: string) => {
+        const restaurant = await prisma.restaurant.findUnique({
+            where: { slug },
+        });
 
-    return restaurant;
-});
+        if (!restaurant) {
+            notFound();
+        }
+
+        return restaurant;
+    },
+    ['restaurant-slug'],
+    { revalidate: 3600, tags: ['restaurant'] }
+);
 
 export const getRestaurantById = cache(async (id: string) => {
     const restaurant = await prisma.restaurant.findUnique({

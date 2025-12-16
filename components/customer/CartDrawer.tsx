@@ -6,6 +6,7 @@ import { X, Trash2, Plus, Minus, ChevronRight, Tag, Shield, AlertCircle } from '
 import { useCart } from '@/lib/stores/cart-store';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import Image from 'next/image';
 
 interface CartDrawerProps {
     isOpen: boolean;
@@ -161,11 +162,15 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                                             {/* Item Image */}
                                             <div className="w-20 h-20 bg-restaurant-neutral-100 rounded-lg overflow-hidden shrink-0">
                                                 {item.image ? (
-                                                    <img
-                                                        src={item.image}
-                                                        alt={item.name}
-                                                        className="w-full h-full object-cover"
-                                                    />
+                                                    <div className="relative w-full h-full">
+                                                        <Image
+                                                            src={item.image}
+                                                            alt={item.name}
+                                                            fill
+                                                            className="object-cover"
+                                                            sizes="80px"
+                                                        />
+                                                    </div>
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center text-restaurant-neutral-400">
                                                         <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">

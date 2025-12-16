@@ -1,18 +1,24 @@
 import prisma from '@/lib/db';
 import { getRestaurantBySlug } from '@/lib/tenant';
 
-export async function getWaiterMenu(slug: string) {
-    const restaurant = await getRestaurantBySlug(slug);
+import { unstable_cache } from 'next/cache';
 
-    const menuItems = await prisma.menuItem.findMany({
-        where: { restaurantId: restaurant.id },
-    });
+export const getWaiterMenu = unstable_cache(
+    async (slug: string) => {
+        const restaurant = await getRestaurantBySlug(slug);
 
-    // Serialize Decimals for Client Component
-    const serializedMenuItems = menuItems.map(item => ({
-        ...item,
-        price: item.price.toNumber(),
-    }));
+        const menuItems = await prisma.menuItem.findMany({
+            where: { restaurantId: restaurant.id },
+        });
 
-    return { restaurant, menuItems: serializedMenuItems };
-}
+        // Serialize Decimals for Client Component
+        const serializedMenuItems = menuItems.map(item => ({
+            ...item,
+            price: item.price.toNumber(),
+        }));
+
+        return { restaurant, menuItems: serializedMenuItems };
+    },
+    ['waiter-menu'], // Cache key
+    { revalidate: 3600, tags: ['menu'] } // Revalidate every hour
+);
