@@ -39,7 +39,7 @@ QREats is built with a security-first architecture:
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/AmoreGiTs/QREats.git
+   git clone https://github.com/AmoreGiTs/QREats..git
    ```
 
 2. **Install dependencies**:
