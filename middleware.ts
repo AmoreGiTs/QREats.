@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { getToken } from 'next-auth/jwt';
 
-export default function proxy(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
     const url = request.nextUrl;
     let hostname = request.headers.get('host')!;
 
@@ -28,12 +29,53 @@ export default function proxy(request: NextRequest) {
         return NextResponse.next();
     }
 
-    // Rewrite everything else to /[subdomain]/path
+    // Authenticate and Enforce RBAC
+    // Note: We need to import getToken from next-auth/jwt.
+    // However, middleware runs in Edge runtime. next-auth/jwt is compatible.
+
+    // Check if the path is protected
+    const isAdminPath = path.includes('/admin');
+    const isKitchenPath = path.includes('/kitchen');
+
+    if (isAdminPath || isKitchenPath) {
+        // We verify session here
+        // We need 'next-auth/jwt' import. But verify availability in Edge.
+        // If imports fail, we might need a separate auth middleware file or use 'export { auth } from "auth"' (NextAuth v5 style).
+        // Package.json has next-auth v4 (^4.24.13). getToken works.
+    }
+    // See full implementation below with imports added at top
     // Security Headers
     const responseHeaders = new Headers(request.headers);
     responseHeaders.set('X-Frame-Options', 'DENY');
     responseHeaders.set('X-Content-Type-Options', 'nosniff');
     responseHeaders.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+
+    // Rewrite path logic
+    // Strict RBAC Verification
+    const secret = process.env.NEXTAUTH_SECRET;
+    
+    // We only check auth for admin/kitchen routes to avoid overhead on public static assets
+    if (path.includes('/admin') || path.includes('/kitchen')) {
+        const token = await getToken({ req: request, secret });
+
+        if (!token) {
+            const loginUrl = new URL('/auth/login', request.url);
+            loginUrl.searchParams.set('callbackUrl', request.url);
+            return NextResponse.redirect(loginUrl);
+        }
+
+        const role = token.role as string;
+        
+        // Admin: OWNER or MANAGER
+        if (path.includes('/admin') && role !== 'OWNER' && role !== 'MANAGER') {
+             return NextResponse.redirect(new URL('/unauthorized', request.url));
+        }
+
+        // Kitchen: OWNER, MANAGER, or KITCHEN
+        if (path.includes('/kitchen') && !['OWNER', 'MANAGER', 'KITCHEN'].includes(role)) {
+             return NextResponse.redirect(new URL('/unauthorized', request.url));
+        }
+    }
 
     // Rewrite path logic
     const rwResponse = NextResponse.rewrite(new URL(`/${subdomain}${path}`, request.url), {

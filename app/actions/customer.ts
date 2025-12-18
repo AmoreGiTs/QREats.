@@ -4,11 +4,21 @@ import prisma from '@/lib/db';
 import { deductInventoryFIFO } from '@/lib/inventory';
 import { revalidatePath } from 'next/cache';
 
+import { PlaceCustomerOrderSchema } from '@/lib/validations';
+
 export async function placeCustomerOrder(
     slug: string,
     tableId: string | number,
     items: { menuItemId: string; quantity: number; price: number }[]
 ) {
+    const validation = PlaceCustomerOrderSchema.safeParse({ slug, tableId, items });
+
+    if (!validation.success) {
+        return { success: false, error: validation.error.issues[0].message };
+    }
+
+    // Re-assign explicitly to ensure type safety from validation, although args are already typed
+    // const { slug: vSlug, tableId: vTableId, items: vItems } = validation.data;
     try {
         const restaurant = await prisma.restaurant.findUnique({ where: { slug } });
         if (!restaurant) throw new Error("Restaurant not found");

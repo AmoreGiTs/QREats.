@@ -3,7 +3,15 @@
 import prisma from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 
+import { UpdateOrderStatusSchema } from '@/lib/validations';
+
 export async function updateOrderStatus(orderId: string, newStatus: string, restaurantId: string) {
+    const validation = UpdateOrderStatusSchema.safeParse({ orderId, newStatus, restaurantId });
+
+    if (!validation.success) {
+        return { success: false, error: validation.error.issues[0].message };
+    }
+
     try {
         await prisma.order.update({
             where: { id: orderId },

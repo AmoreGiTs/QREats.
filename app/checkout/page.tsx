@@ -13,7 +13,7 @@ import {
     CashPaymentInfo,
     PaymentMethodType,
 } from '@/components/customer/PaymentMethod';
-import { ShoppingBag, MapPin, CreditCard, CheckCircle } from 'lucide-react';
+import { ShoppingBag, MapPin, CreditCard, CheckCircle, User, Award } from 'lucide-react';
 
 export default function CheckoutPage() {
     const router = useRouter();
@@ -34,6 +34,7 @@ export default function CheckoutPage() {
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethodType | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
     const [orderId, setOrderId] = useState<string | null>(null);
+    const [customerInfo, setCustomerInfo] = useState({ name: '', phone: '', email: '' });
 
     // Redirect if cart is empty
     useEffect(() => {
@@ -77,6 +78,7 @@ export default function CheckoutPage() {
                 promoDiscount: getPromoDiscount(),
                 promoCode: promoCode?.code,
                 paymentData,
+                customer: customerInfo,
             };
 
             // Submit order
@@ -239,6 +241,42 @@ export default function CheckoutPage() {
                                             <p className="text-sm text-restaurant-neutral-600">
                                                 Choose how you'd like to pay
                                             </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Customer Info Form */}
+                                    <div className="mb-8 p-6 bg-restaurant-neutral-50 rounded-2xl border border-restaurant-neutral-100">
+                                        <h3 className="text-lg font-bold text-restaurant-neutral-900 mb-4 flex items-center gap-2">
+                                            <User className="w-5 h-5 text-restaurant-primary-600" />
+                                            Customer Information
+                                        </h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-xs font-bold text-restaurant-neutral-500 uppercase tracking-wider mb-1">Your Name</label>
+                                                <input
+                                                    type="text"
+                                                    value={customerInfo.name}
+                                                    onChange={(e) => setCustomerInfo({ ...customerInfo, name: e.target.value })}
+                                                    className="w-full px-4 py-2 rounded-xl border border-restaurant-neutral-200 focus:outline-none focus:ring-2 focus:ring-restaurant-primary-500 transition-all"
+                                                    placeholder="e.g. John Doe"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-bold text-restaurant-neutral-500 uppercase tracking-wider mb-1">Phone Number</label>
+                                                <input
+                                                    type="tel"
+                                                    value={customerInfo.phone}
+                                                    onChange={(e) => setCustomerInfo({ ...customerInfo, phone: e.target.value })}
+                                                    className="w-full px-4 py-2 rounded-xl border border-restaurant-neutral-200 focus:outline-none focus:ring-2 focus:ring-restaurant-primary-500 transition-all"
+                                                    placeholder="e.g. 0712345678"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="mt-4 p-3 bg-emerald-50 rounded-lg flex items-center gap-3 border border-emerald-100">
+                                            <Award className="w-5 h-5 text-emerald-600" />
+                                            <div className="text-xs text-emerald-800 font-medium">
+                                                You'll earn <span className="font-bold">{Math.floor(getTotal() / 100)} points</span> with this order!
+                                            </div>
                                         </div>
                                     </div>
 

@@ -4,6 +4,8 @@ import prisma from '@/lib/db';
 import { deductInventoryFIFO, restockInventoryForRefund } from '@/lib/inventory';
 import { revalidatePath } from 'next/cache';
 
+import { CreateOrderSchema } from '@/lib/validations';
+
 export type CreateOrderInput = {
     restaurantId: string;
     items: {
@@ -15,7 +17,13 @@ export type CreateOrderInput = {
 };
 
 export async function createOrder(input: CreateOrderInput) {
-    const { restaurantId, items, totalAmount } = input;
+    const validation = CreateOrderSchema.safeParse(input);
+
+    if (!validation.success) {
+        return { success: false, error: validation.error.issues[0].message };
+    }
+
+    const { restaurantId, items, totalAmount } = validation.data;
 
     try {
         // Transaction ensures inventory is deducted ONLY if order is created successfully

@@ -3,6 +3,7 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import prisma from "@/lib/db";
+import { rateLimit } from "@/lib/ratelimit";
 import bcrypt from "bcryptjs";
 
 // DEVELOPMENT SECRET - matches .env.development.local
@@ -36,7 +37,18 @@ export const authOptions: NextAuthOptions = {
                 email: { label: "Email", type: "email" },
                 password: { label: "Password", type: "password" }
             },
-            async authorize(credentials) {
+            // ... inside authorize
+            async authorize(credentials, req) {
+                // Rate Limiting
+                // Req object might be available if we pass it, but standard authorize signature has limited context in some versions.
+                // However, NextAuth v4 credentials provider authorize can take req as second arg if configured.
+                // But simplified: Use email as key or just skip strict IP rate limit here if request object isn't reliably available in this context without advanced setup.
+                // Actually, let's use email as key.
+                if (credentials?.email) {
+                    const { success } = rateLimit(`login:${credentials.email}`, 5, 60 * 1000); // 5 attempts per minute per email
+                    if (!success) throw new Error("Too many login attempts. Please try again later.");
+                }
+
                 if (!credentials?.email || !credentials?.password) {
                     return null;
                 }

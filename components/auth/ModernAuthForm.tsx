@@ -16,6 +16,7 @@ import {
     Store
 } from 'lucide-react';
 import { AnimatedLogo } from '@/components/ui/AnimatedLogo';
+import { signIn } from 'next-auth/react';
 
 const loginSchema = z.object({
     email: z.string().email('Invalid email address'),

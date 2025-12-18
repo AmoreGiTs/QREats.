@@ -2,35 +2,44 @@ import { NextRequest, NextResponse } from 'next/server';
 import { hash } from 'bcryptjs';
 import prisma from '@/lib/db';
 
+import { rateLimit } from '@/lib/ratelimit';
+
 export async function POST(request: NextRequest) {
-    try {
-        const body = await request.json();
-        const { restaurantName, email, phone, password, plan } = body;
+  try {
+    // Rate Limiting
+    const ip = request.headers.get('x-forwarded-for') || 'ip';
+    const { success } = rateLimit(`register:${ip}`, 5, 60 * 1000); // 5 requests per minute
+    if (!success) {
+      return NextResponse.json({ success: false, error: 'Too many requests' }, { status: 429 });
+    }
 
-        // Validate required fields
-        if (!restaurantName || !email || !phone || !password || !plan) {
-            return NextResponse.json(
-                { success: false, error: 'All fields are required' },
-                { status: 400 }
-            );
-        }
+    const body = await request.json();
+    const { restaurantName, email, phone, password, plan } = body;
 
-        // Check if user already exists
-        const existingUser = await prisma.user.findUnique({
-            where: { email },
-        });
+    // Validate required fields
+    if (!restaurantName || !email || !phone || !password || !plan) {
+      return NextResponse.json(
+        { success: false, error: 'All fields are required' },
+        { status: 400 }
+      );
+    }
 
-        if (existingUser) {
-            return NextResponse.json(
-                { success: false, error: 'User with this email already exists' },
-                { status: 400 }
-            );
-        }
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
 
-        // Hash password
-        const hashedPassword = await hash(password, 12);
+    if (existingUser) {
+      return NextResponse.json(
+        { success: false, error: 'User with this email already exists' },
+        { status: 400 }
+      );
+    }
 
-        // Create restaurant and user
+    // Hash password
+    const hashedPassword = await hash(password, 12);
+
+    // Create restaurant and user
     const restaurant = await prisma.restaurant.create({
       data: {
         name: restaurantName,
@@ -61,11 +70,11 @@ export async function POST(request: NextRequest) {
       restaurantId: restaurant.id,
       userId: user?.id,
     });
-    } catch (error: any) {
-        console.error('Registration error:', error);
-        return NextResponse.json(
-            { success: false, error: error.message || 'Registration failed' },
-            { status: 500 }
-        );
-    }
+  } catch (error: any) {
+    console.error('Registration error:', error);
+    return NextResponse.json(
+      { success: false, error: error.message || 'Registration failed' },
+      { status: 500 }
+    );
+  }
 }

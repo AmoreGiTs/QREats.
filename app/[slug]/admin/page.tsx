@@ -3,6 +3,7 @@ import { AnimatedLogo } from '@/components/ui/AnimatedLogo';
 import { refundOrder } from '@/app/actions/order';
 import Link from 'next/link';
 import { requireAdmin } from '@/lib/auth-guards';
+import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { redirect } from 'next/navigation';
 
 export default async function AdminPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -20,34 +21,7 @@ export default async function AdminPage({ params }: { params: Promise<{ slug: st
 
     return (
         <div className="min-h-screen bg-[#F3F4F6] flex font-sans text-gray-900">
-            {/* Sidebar navigation */}
-            <aside className="fixed inset-y-0 left-0 w-72 bg-white border-r border-gray-100 flex flex-col z-20">
-                <div className="p-8">
-                    <div><AnimatedLogo /></div>
-                    <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">Admin Console</div>
-                </div>
-
-                <nav className="flex-1 px-4 space-y-2">
-                    <NavItem active icon="📊" label="Overview" />
-                    <NavItem icon="🛍️" label="Orders" />
-                    <NavItem icon="📦" label="Inventory" />
-                    <NavItem icon="👥" label="Customers" />
-                </nav>
-
-                <div className="p-6 border-t border-gray-100">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-lg font-bold text-gray-500">
-                            {restaurant.name[0]}
-                        </div>
-                        <div>
-                            <div className="font-bold text-sm">{restaurant.name}</div>
-                            <div className="text-xs text-green-500 flex items-center gap-1">
-                                <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span> Online
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </aside>
+            <AdminSidebar restaurant={restaurant} />
 
             {/* Main Content */}
             <main className="ml-72 flex-1 p-8 lg:p-12">

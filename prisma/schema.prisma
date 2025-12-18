@@ -1,217 +1,237 @@
-// schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "sqlite"
   url      = "file:./dev.db"
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
-// Enums removed for SQLite compatibility
-
 model Restaurant {
-  id            String   @id @default(uuid())
-  name          String
-  slug          String   @unique // Subdomain
-  createdAt     DateTime @default(now())
-  
-  // Branding
-  primaryColor  String   @default("#000000")
-  logoUrl       String?
-
-  users         User[]
+  id             String          @id @default(uuid())
+  name           String
+  slug           String          @unique
+  createdAt      DateTime        @default(now())
+  primaryColor   String          @default("#000000")
+  logoUrl        String?
+  auditLogs      AuditLog[]
+  customers      Customer[]
   inventoryItems InventoryItem[]
-  orders        Order[]
-  menuItems     MenuItem[]
-  customers     Customer[]
-  auditLogs     AuditLog[]
+  menuItems      MenuItem[]
+  orders         Order[]
+  reservations   Reservation[]
+  tables         Table[]
+  users          User[]
 }
 
 model User {
-  id            String   @id @default(uuid())
-  email         String   @unique
-  passwordHash  String?  // Nullable if OAuth only, but we use Credentials
+  id            String      @id @default(uuid())
+  email         String      @unique
+  passwordHash  String?
   name          String?
   phone         String?
-  role          String   @default("WAITER") // OWNER, MANAGER, WAITER, CHEF, ADMIN
-  
+  role          String      @default("WAITER")
   restaurantId  String?
-  restaurant    Restaurant? @relation(fields: [restaurantId], references: [id])
-  
-  // Auth
   image         String?
   emailVerified DateTime?
-  
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
-  sessions      Session[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
   auditLogs     AuditLog[]
+  sessions      Session[]
+  restaurant    Restaurant? @relation(fields: [restaurantId], references: [id])
 }
 
 model Session {
   id           String   @id @default(cuid())
   sessionToken String   @unique
   userId       String
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model MenuItem {
-  id            String   @id @default(uuid())
-  name          String
-  price         Decimal
-  restaurantId  String
-  restaurant    Restaurant @relation(fields: [restaurantId], references: [id])
-  
-  // Advanced Menu Fields
-  category      String   @default("Mains")
-  description   String?
-  imageUrl      String?
-  isAvailable   Boolean  @default(true)
-  dietaryInfo   String?  // Comma separated tags: VEG, SPICY, GF
-
-  recipe        Recipe[]
-  orderItems    OrderItem[]
+  id           String      @id @default(uuid())
+  name         String
+  price        Decimal
+  restaurantId String
+  category     String      @default("Mains")
+  description  String?
+  imageUrl     String?
+  isAvailable  Boolean     @default(true)
+  dietaryInfo  String?
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id])
+  orderItems   OrderItem[]
+  recipe       Recipe[]
 }
 
 model InventoryItem {
-  id            String   @id @default(uuid())
-  name          String
-  unit          String   // kg, liters, pcs
-  
-  restaurantId  String
-  restaurant    Restaurant @relation(fields: [restaurantId], references: [id])
-  
-  batches       InventoryBatch[]
-  transactions  InventoryTransaction[]
-  recipes       Recipe[]
+  id           String                 @id @default(uuid())
+  name         String
+  unit         String
+  restaurantId String
+  batches      InventoryBatch[]
+  restaurant   Restaurant             @relation(fields: [restaurantId], references: [id])
+  transactions InventoryTransaction[]
+  recipes      Recipe[]
 }
 
 model InventoryBatch {
-  id               String   @id @default(uuid())
-  inventoryItemId  String
-  inventoryItem    InventoryItem @relation(fields: [inventoryItemId], references: [id])
-  
-  quantityInitial  Decimal
+  id                String                 @id @default(uuid())
+  inventoryItemId   String
+  quantityInitial   Decimal
   quantityRemaining Decimal
-  costPerUnit      Decimal
-  receivedAt       DateTime @default(now())
-  expirationDate   DateTime?
-
-  transactions     InventoryTransaction[]
+  costPerUnit       Decimal
+  receivedAt        DateTime               @default(now())
+  expirationDate    DateTime?
+  inventoryItem     InventoryItem          @relation(fields: [inventoryItemId], references: [id])
+  transactions      InventoryTransaction[]
 }
 
 model InventoryTransaction {
-  id               String   @id @default(uuid())
-  inventoryItemId  String
-  inventoryItem    InventoryItem @relation(fields: [inventoryItemId], references: [id])
-  
-  batchId          String
-  batch            InventoryBatch @relation(fields: [batchId], references: [id])
-  
-  quantity         Decimal
-  type             String // InventoryTxType: DEDUCT, RESTOCK
-  
-  orderId          String?
-  refundId         String?
-  
-  createdAt        DateTime @default(now())
+  id              String         @id @default(uuid())
+  inventoryItemId String
+  batchId         String
+  quantity        Decimal
+  type            String
+  orderId         String?
+  refundId        String?
+  createdAt       DateTime       @default(now())
+  batch           InventoryBatch @relation(fields: [batchId], references: [id])
+  inventoryItem   InventoryItem  @relation(fields: [inventoryItemId], references: [id])
 }
 
 model Recipe {
-  id               String   @id @default(uuid())
+  id               String        @id @default(uuid())
   menuItemId       String
-  menuItem         MenuItem @relation(fields: [menuItemId], references: [id])
-  
   inventoryItemId  String
-  inventoryItem    InventoryItem @relation(fields: [inventoryItemId], references: [id])
-  
   quantityRequired Decimal
+  inventoryItem    InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  menuItem         MenuItem      @relation(fields: [menuItemId], references: [id])
 }
 
 model Order {
-  id            String   @id @default(uuid())
-  restaurantId  String
-  restaurant    Restaurant @relation(fields: [restaurantId], references: [id])
-  
-  status        String   @default("PENDING") // OrderStatus
-  totalAmount   Decimal
-  
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
-  items         OrderItem[]
-  refunds       Refund[]
-  payments      Payment[]
+  id                  String               @id @default(uuid())
+  restaurantId        String
+  status              String               @default("PENDING")
+  totalAmount         Decimal
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  customerId          String?
+  tableId             String?
+  loyaltyTransactions LoyaltyTransaction[]
+  table               Table?               @relation(fields: [tableId], references: [id])
+  customer            Customer?            @relation(fields: [customerId], references: [id])
+  restaurant          Restaurant           @relation(fields: [restaurantId], references: [id])
+  items               OrderItem[]
+  payments            Payment[]
+  refunds             Refund[]
 }
 
 model OrderItem {
-  id            String   @id @default(uuid())
-  orderId       String
-  order         Order    @relation(fields: [orderId], references: [id])
-  
-  menuItemId    String
-  menuItem      MenuItem @relation(fields: [menuItemId], references: [id])
-  
-  quantity      Int
-  priceAtOrder  Decimal
+  id           String   @id @default(uuid())
+  orderId      String
+  menuItemId   String
+  quantity     Int
+  priceAtOrder Decimal
+  menuItem     MenuItem @relation(fields: [menuItemId], references: [id])
+  order        Order    @relation(fields: [orderId], references: [id])
 }
 
 model Refund {
-  id            String   @id @default(uuid())
-  orderId       String
-  order         Order    @relation(fields: [orderId], references: [id])
-  
-  amount        Decimal
-  reason        String?
-  createdAt     DateTime @default(now())
+  id        String   @id @default(uuid())
+  orderId   String
+  amount    Decimal
+  reason    String?
+  createdAt DateTime @default(now())
+  order     Order    @relation(fields: [orderId], references: [id])
 }
 
 model Payment {
-  id            String   @id @default(uuid())
-  orderId       String
-  order         Order    @relation(fields: [orderId], references: [id])
-  amount        Decimal
-  currency      String   @default("KES")
-  method        String   // mpesa, cash, card
-  status        String   // pending, completed, failed, refunded
-  reference     String?  // MPesa transaction ID
-  metadata      String?  // JSON string
-  
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id        String   @id @default(uuid())
+  orderId   String
+  amount    Decimal
+  currency  String   @default("KES")
+  method    String
+  status    String
+  reference String?
+  metadata  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  order     Order    @relation(fields: [orderId], references: [id])
 }
 
 model Customer {
-  id            String   @id @default(uuid())
-  restaurantId  String
-  restaurant    Restaurant @relation(fields: [restaurantId], references: [id])
-  phone         String?
-  email         String?
-  name          String?
-  
-  // Loyalty
-  loyaltyPoints Int      @default(0)
-  visitsCount   Int      @default(0)
-  
-  createdAt     DateTime @default(now())
-  
+  id                  String               @id @default(uuid())
+  restaurantId        String
+  phone               String?
+  email               String?
+  name                String?
+  loyaltyPoints       Int                  @default(0)
+  visitsCount         Int                  @default(0)
+  createdAt           DateTime             @default(now())
+  birthDate           DateTime?
+  lastVisitAt         DateTime?
+  preferences         String?
+  restaurant          Restaurant           @relation(fields: [restaurantId], references: [id])
+  loyaltyTransactions LoyaltyTransaction[]
+  orders              Order[]
+  reservations        Reservation[]
+
   @@unique([restaurantId, phone])
   @@unique([restaurantId, email])
 }
 
+model Table {
+  id           String        @id @default(uuid())
+  number       String
+  capacity     Int
+  status       String        @default("AVAILABLE")
+  restaurantId String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  orders       Order[]
+  reservations Reservation[]
+  restaurant   Restaurant    @relation(fields: [restaurantId], references: [id])
+
+  @@unique([restaurantId, number])
+}
+
+model Reservation {
+  id           String     @id @default(uuid())
+  restaurantId String
+  customerId   String
+  tableId      String?
+  reserveTime  DateTime
+  partySize    Int
+  status       String     @default("CONFIRMED")
+  notes        String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  table        Table?     @relation(fields: [tableId], references: [id])
+  customer     Customer   @relation(fields: [customerId], references: [id])
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+}
+
+model LoyaltyTransaction {
+  id         String   @id @default(uuid())
+  customerId String
+  orderId    String?
+  points     Int
+  type       String
+  createdAt  DateTime @default(now())
+  order      Order?   @relation(fields: [orderId], references: [id])
+  customer   Customer @relation(fields: [customerId], references: [id])
+}
+
 model AuditLog {
-  id            String   @id @default(uuid())
-  restaurantId  String
-  restaurant    Restaurant @relation(fields: [restaurantId], references: [id])
-  userId        String?
-  user          User?    @relation(fields: [userId], references: [id])
-  action        String   // CREATE, UPDATE, DELETE, LOGIN
-  entityType    String   // ORDER, INVENTORY, etc.
-  entityId      String?
-  changes       String?  // JSON string
-  
-  createdAt     DateTime @default(now())
+  id           String     @id @default(uuid())
+  restaurantId String
+  userId       String?
+  action       String
+  entityType   String
+  entityId     String?
+  changes      String?
+  createdAt    DateTime   @default(now())
+  user         User?      @relation(fields: [userId], references: [id])
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
 }

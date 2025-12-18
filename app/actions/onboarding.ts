@@ -4,15 +4,23 @@ import prisma from '@/lib/db';
 import { redirect } from 'next/navigation';
 import bcrypt from 'bcryptjs';
 
-export async function createRestaurant(prevState: any, formData: FormData) {
-    const name = formData.get('name') as string;
-    const slug = formData.get('slug') as string;
-    const email = formData.get('email') as string;
-    const primaryColor = formData.get('primaryColor') as string || '#000000';
+import { RestaurantSchema } from '@/lib/validations';
 
-    if (!name || !slug || !email) {
-        return { message: 'Name, Slug, and Email are required' };
+export async function createRestaurant(prevState: any, formData: FormData) {
+    const rawData = {
+        name: formData.get('name') as string,
+        slug: formData.get('slug') as string,
+        email: formData.get('email') as string,
+        primaryColor: formData.get('primaryColor') as string,
+    };
+
+    const validation = RestaurantSchema.safeParse(rawData);
+
+    if (!validation.success) {
+        return { message: validation.error.issues[0].message };
     }
+
+    const { name, slug, email, primaryColor } = validation.data;
 
     try {
         const existing = await prisma.restaurant.findUnique({ where: { slug } });

@@ -18,6 +18,7 @@ export async function POST(request: NextRequest) {
       promoDiscount,
       promoCode,
       paymentData,
+      customer: customerReq,
     } = body;
 
     // Validate required fields
@@ -35,6 +36,45 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // CRM: Find or create customer
+    let customerId = null;
+    if (customerReq?.phone) {
+        const customer = await prisma.customer.upsert({
+            where: {
+                restaurantId_phone: {
+                    restaurantId,
+                    phone: customerReq.phone
+                }
+            },
+            update: {
+                name: customerReq.name || undefined,
+                lastVisitAt: new Date(),
+                visitsCount: { increment: 1 },
+            },
+            create: {
+                restaurantId,
+                phone: customerReq.phone,
+                email: customerReq.email || null,
+                name: customerReq.name || 'Guest',
+                lastVisitAt: new Date(),
+                visitsCount: 1,
+            }
+        });
+        customerId = customer.id;
+    }
+
+    // Table Management: Update table status
+    if (tableId) {
+        try {
+            await prisma.table.update({
+                where: { id: tableId },
+                data: { status: 'OCCUPIED' }
+            });
+        } catch (e) {
+            console.warn('Could not update table status:', e);
+        }
+    }
+
     // Generate order number
     const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
 
@@ -44,6 +84,8 @@ export async function POST(request: NextRequest) {
         restaurantId,
         status: 'PENDING',
         totalAmount,
+        customerId,
+        tableId,
         items: {
           create: items.map((item: any) => ({
             menuItemId: item.menuItemId,
@@ -57,11 +99,29 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // TODO: Store additional order metadata (table, payment method, etc.) in a separate table
-    // For now, we'll return success with the order ID
+    // Loyalty: Award points (1 point per KES 100)
+    if (customerId) {
+        const pointsAwarded = Math.floor(Number(totalAmount) / 100);
+        if (pointsAwarded > 0) {
+            await prisma.customer.update({
+                where: { id: customerId },
+                data: { loyaltyPoints: { increment: pointsAwarded } }
+            });
+
+            await prisma.loyaltyTransaction.create({
+                data: {
+                    customerId,
+                    orderId: order.id,
+                    points: pointsAwarded,
+                    type: 'EARNED'
+                }
+            });
+        }
+    }
 
     // Process payment based on method
     if (paymentMethod === 'mpesa') {
+// ... existing TODOs
       // TODO: Integrate M-Pesa STK Push
       // const mpesaResult = await initiateMpesaPayment({
       //   orderId: order.id,

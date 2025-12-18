@@ -22,3 +22,21 @@ export async function getAdminData(slug: string) {
 
     return { restaurant, orders, inventory };
 }
+
+export async function getTables(restaurantId: string) {
+    return await prisma.table.findMany({
+        where: { restaurantId },
+        orderBy: { number: 'asc' },
+    });
+}
+
+export async function getReservations(restaurantId: string) {
+    return await prisma.reservation.findMany({
+        where: { restaurantId },
+        include: {
+            customer: true,
+            table: true,
+        },
+        orderBy: { reserveTime: 'asc' },
+    });
+}

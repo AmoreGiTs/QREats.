@@ -28,7 +28,14 @@ export default function CustomerMenu({ restaurant, menuItems, tableId }: any) {
     const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [activeCategory, setActiveCategory] = useState('All');
-    const { items, addItem, updateQuantity, clearCart, getTotal, getTotalItems } = useCart();
+    const { items, addItem, updateQuantity, clearCart, getTotal, getTotalItems, setTable } = useCart();
+
+    // Persist Table and Restaurant Info from URL/Props
+    useEffect(() => {
+        if (tableId && restaurant.id) {
+            setTable(tableId, restaurant.id);
+        }
+    }, [tableId, restaurant.id, setTable]);
 
     // Helper to get quantity in cart
     const getQty = (menuItemId: string) => items.find(i => i.itemId === menuItemId)?.quantity || 0;
