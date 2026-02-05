@@ -35,11 +35,36 @@ QREats is built with a security-first architecture:
 - **Styling**: Tailwind CSS with custom Design System
 - **State**: Server-side first + specialized client stores (Zustand)
 
+## ⚙️ Environment Variables
+
+Create a `.env` file in the root directory with the following variables:
+
+```bash
+# Database Connection (e.g., PostgreSQL or SQLite file)
+DATABASE_URL="file:./dev.db"
+
+# NextAuth Configuration
+NEXTAUTH_SECRET="your-secret-key-min-32-chars"
+```
+
+## 📂 Project Structure
+
+```bash
+├── app/                  # Next.js 16 App Router (Pages, API Routes)
+├── components/           # Reusable UI Components
+│   ├── ui/               # Basic UI elements (Buttons, Inputs)
+│   └── ...               # Feature-specific components
+├── lib/                  # Utilities, Hooks, and Stores
+├── prisma/               # Database Schema and Seeds
+├── public/               # Static Assets
+└── types/                # TypeScript Definitions
+```
+
 ## 🚦 Getting Started
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/AmoreGiTs/QREats..git
+   git clone https://github.com/AmoreGiTs/QREats.git
    ```
 
 2. **Install dependencies**:
@@ -55,10 +80,18 @@ QREats is built with a security-first architecture:
 
 4. **Run Development Server**:
    ```bash
+   # Standard start
    npm run dev
+   
+   # OR with Socket.IO support
+   npm run dev:socket
    ```
 
-Visit `http://localhost:3000` to see the application.
+## 🧰 Developer Scripts
+
+- **`./start-dev.sh`**: Starts the dev server with a clean auth state and debug logging enabled. Recommended if you encounter login issues.
+- **`./fix-auth.sh`**: Troubleshooting utility that backs up `.env`, clears Next.js/NextAuth caches, and regenerates the startup script.
+- **`npm run dev:socket`**: Runs the custom server with Socket.IO support for real-time features.
 
 ## 📄 License
 Generic SaaS License. Built for portfolio demonstration.

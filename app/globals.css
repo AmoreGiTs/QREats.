@@ -148,9 +148,9 @@
   --color-ring: hsl(var(--ring));
   --radius-lg: var(--radius);
   --font-display: "Cabinet Grotesk", var(--font-sans);
-  
+
   /* Use usage of variable for sans font */
-  --font-sans: var(--font-sans); 
+  --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
 
   /* Animations */
@@ -184,4 +184,15 @@ body {
   background: var(--color-background);
   color: var(--color-foreground);
   font-family: var(--font-sans);
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}
+
+/* View Transition API - Disable default cross-fade */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+  display: block;
 }

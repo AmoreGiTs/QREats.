@@ -336,9 +336,9 @@ export function ModernAuthForm() {
                                                 </label>
                                                 <div className="grid grid-cols-3 gap-3">
                                                     {[
-                                                        { id: 'basic', name: 'Basic', price: 'Ksh 2,000' },
-                                                        { id: 'pro', name: 'Pro', price: 'Ksh 5,000' },
-                                                        { id: 'enterprise', name: 'Enterprise', price: 'Ksh 15,000' }
+                                                        { id: 'basic', name: 'Starter', price: 'KES 9,900' },
+                                                        { id: 'pro', name: 'Pro', price: 'KES 24,900' },
+                                                        { id: 'enterprise', name: 'Enterprise', price: 'Custom' }
                                                     ].map((plan) => (
                                                         <label
                                                             key={plan.id}
@@ -358,7 +358,7 @@ export function ModernAuthForm() {
                                                                     {plan.name}
                                                                 </div>
                                                                 <div className="text-sm text-restaurant-neutral-600">
-                                                                    {plan.price}/mo
+                                                                    {plan.price}{plan.price !== 'Custom' ? '/mo' : ''}
                                                                 </div>
                                                             </div>
                                                         </label>

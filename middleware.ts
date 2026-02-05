@@ -8,13 +8,9 @@ export default async function proxy(request: NextRequest) {
 
     // Handle localhost for dev
     if (hostname.includes('localhost') || hostname.includes('127.0.0.1')) {
-        // For dev, we might want to simulate subdomains or just use path based.
-        // Let's assume path-based for dev simplicity: localhost:3000/[slug]/...
-        // Or we can rely on manual path navigation.
-        // If we want to test "subdomains" locally, we'd need entry in /etc/hosts.
-
-        // For now, let's keep it simple: No rewrite on localhost unless specific.
-        return NextResponse.next();
+        const response = NextResponse.next();
+        response.headers.set('x-pathname', url.pathname);
+        return response;
     }
 
     const searchParams = request.nextUrl.searchParams.toString();
@@ -53,7 +49,7 @@ export default async function proxy(request: NextRequest) {
     // Rewrite path logic
     // Strict RBAC Verification
     const secret = process.env.NEXTAUTH_SECRET;
-    
+
     // We only check auth for admin/kitchen routes to avoid overhead on public static assets
     if (path.includes('/admin') || path.includes('/kitchen')) {
         const token = await getToken({ req: request, secret });
@@ -65,15 +61,15 @@ export default async function proxy(request: NextRequest) {
         }
 
         const role = token.role as string;
-        
+
         // Admin: OWNER or MANAGER
         if (path.includes('/admin') && role !== 'OWNER' && role !== 'MANAGER') {
-             return NextResponse.redirect(new URL('/unauthorized', request.url));
+            return NextResponse.redirect(new URL('/unauthorized', request.url));
         }
 
         // Kitchen: OWNER, MANAGER, or KITCHEN
         if (path.includes('/kitchen') && !['OWNER', 'MANAGER', 'KITCHEN'].includes(role)) {
-             return NextResponse.redirect(new URL('/unauthorized', request.url));
+            return NextResponse.redirect(new URL('/unauthorized', request.url));
         }
     }
 
@@ -118,6 +114,8 @@ export default async function proxy(request: NextRequest) {
     Object.entries(headers).forEach(([key, value]) => {
         rwResponse.headers.set(key, value);
     });
+
+    rwResponse.headers.set('x-pathname', url.pathname);
 
     return rwResponse;
 }
