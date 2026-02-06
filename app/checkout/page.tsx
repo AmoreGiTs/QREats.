@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { useCart } from '@/lib/stores/cart-store';
 import { CheckoutSteps, CheckoutNavigation } from '@/components/customer/CheckoutSteps';
@@ -13,10 +13,11 @@ import {
     CashPaymentInfo,
     PaymentMethodType,
 } from '@/components/customer/PaymentMethod';
-import { ShoppingBag, MapPin, CreditCard, CheckCircle, User, Award } from 'lucide-react';
+import { ShoppingBag, MapPin, CreditCard, CheckCircle, User, Award, AlertCircle, Loader2 } from 'lucide-react';
 
 export default function CheckoutPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const {
         items,
         getSubtotal,
@@ -35,28 +36,82 @@ export default function CheckoutPage() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [orderId, setOrderId] = useState<string | null>(null);
     const [customerInfo, setCustomerInfo] = useState({ name: '', phone: '', email: '' });
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [paymentError, setPaymentError] = useState<string | null>(null);
 
-    // Redirect if cart is empty
+    // Auto-redirect if cart is empty
     useEffect(() => {
         if (items.length === 0 && currentStep === 1) {
             router.push('/');
         }
     }, [items.length, currentStep, router]);
 
-    const handleNext = () => {
-        if (currentStep < 3) {
-            setCurrentStep(currentStep + 1);
-        }
-    };
+    // Memoize calculations for performance
+    const subtotal = useMemo(() => getSubtotal(), [getSubtotal]);
+    const serviceCharge = useMemo(() => getServiceChargeAmount(), [getServiceChargeAmount]);
+    const vat = useMemo(() => getVatAmount(), [getVatAmount]);
+    const promoDiscount = useMemo(() => getPromoDiscount(), [getPromoDiscount]);
+    const total = useMemo(() => getTotal(), [getTotal]);
+    const loyaltyPoints = useMemo(() => Math.floor(total / 100), [total]);
 
-    const handleBack = () => {
+    // Validate customer info
+    const validateCustomerInfo = useCallback((): boolean => {
+        const newErrors: Record<string, string> = {};
+
+        if (!customerInfo.name.trim()) {
+            newErrors.name = 'Name is required';
+        } else if (customerInfo.name.trim().length < 2) {
+            newErrors.name = 'Name must be at least 2 characters';
+        }
+
+        const phoneRegex = /^(?:\+?254|0)?[71]\d{8}$/;
+        if (!customerInfo.phone.trim()) {
+            newErrors.phone = 'Phone number is required';
+        } else if (!phoneRegex.test(customerInfo.phone.replace(/\s/g, ''))) {
+            newErrors.phone = 'Invalid Kenyan phone number';
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (customerInfo.email.trim() && !emailRegex.test(customerInfo.email)) {
+            newErrors.email = 'Invalid email address';
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    }, [customerInfo]);
+
+    const handleNext = useCallback(() => {
+        if (currentStep === 1) {
+            if (items.length === 0) {
+                return;
+            }
+            setCurrentStep(2);
+        } else if (currentStep === 2) {
+            if (!validateCustomerInfo()) {
+                return;
+            }
+            setCurrentStep(3);
+        }
+    }, [currentStep, items.length, validateCustomerInfo]);
+
+    const handleBack = useCallback(() => {
         if (currentStep > 1) {
             setCurrentStep(currentStep - 1);
         }
-    };
+    }, [currentStep]);
 
-    const handlePayment = async (paymentData?: any) => {
+    const handlePayment = useCallback(async (paymentData?: any) => {
+        if (!validateCustomerInfo()) {
+            return;
+        }
+
+        if (!selectedPaymentMethod) {
+            setPaymentError('Please select a payment method');
+            return;
+        }
+
         setIsProcessing(true);
+        setPaymentError(null);
 
         try {
             // Prepare order data
@@ -71,22 +126,32 @@ export default function CheckoutPage() {
                 tableId,
                 restaurantId,
                 paymentMethod: selectedPaymentMethod,
-                totalAmount: getTotal(),
-                subtotal: getSubtotal(),
-                serviceCharge: getServiceChargeAmount(),
-                vat: getVatAmount(),
-                promoDiscount: getPromoDiscount(),
+                totalAmount: total,
+                subtotal,
+                serviceCharge,
+                vat,
+                promoDiscount,
                 promoCode: promoCode?.code,
                 paymentData,
                 customer: customerInfo,
             };
 
-            // Submit order
+            // Submit order with timeout
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 30000);
+
             const response = await fetch('/api/orders/create', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(orderData),
+                signal: controller.signal,
             });
+
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
 
             const result = await response.json();
 
@@ -97,17 +162,41 @@ export default function CheckoutPage() {
                 // Clear cart after successful order
                 setTimeout(() => {
                     clearCart();
-                }, 1000);
+                }, 1500);
             } else {
                 throw new Error(result.error || 'Failed to create order');
             }
         } catch (error: any) {
             console.error('Payment error:', error);
-            alert(`Payment failed: ${error.message}`);
+
+            let errorMessage = 'Failed to process payment. Please try again.';
+
+            if (error.name === 'AbortError') {
+                errorMessage = 'Request timed out. Please try again.';
+            } else if (error.message.includes('Network')) {
+                errorMessage = 'Network error. Please check your connection.';
+            }
+
+            setPaymentError(errorMessage);
         } finally {
             setIsProcessing(false);
         }
-    };
+    }, [
+        validateCustomerInfo,
+        selectedPaymentMethod,
+        items,
+        tableId,
+        restaurantId,
+        total,
+        subtotal,
+        serviceCharge,
+        vat,
+        promoDiscount,
+        promoCode,
+        customerInfo,
+        clearCart,
+    ]);
+
 
     const canProceedToPayment = currentStep === 1;
     const canSubmitPayment = currentStep === 2 && selectedPaymentMethod !== null;
