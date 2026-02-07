@@ -42,15 +42,25 @@ const registerSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 type RegisterFormData = z.infer<typeof registerSchema>;
 
+import { useSearchParams } from 'next/navigation';
+
 export function ModernAuthForm() {
-    const [isLogin, setIsLogin] = useState(true);
+    const searchParams = useSearchParams();
+    const mode = searchParams.get('mode');
+    const plan = searchParams.get('plan');
+
+    // Default to login unless mode is explicitly 'register' or a plan is selected
+    const [isLogin, setIsLogin] = useState(mode !== 'register' && !plan);
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [authError, setAuthError] = useState<string | null>(null);
     const [authSuccess, setAuthSuccess] = useState<string | null>(null);
 
     const { register, handleSubmit, formState: { errors }, reset } = useForm<LoginFormData | RegisterFormData>({
-        resolver: zodResolver(isLogin ? loginSchema : registerSchema)
+        resolver: zodResolver(isLogin ? loginSchema : registerSchema),
+        defaultValues: {
+            plan: (plan as any) || 'basic'
+        }
     });
 
     const onSubmit = async (data: LoginFormData | RegisterFormData) => {

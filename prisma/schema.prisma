@@ -114,6 +114,8 @@ model Order {
   restaurantId        String
   status              String               @default("PENDING")
   totalAmount         Decimal
+  paymentMethod       String               @default("CASH")
+  paymentStatus       String               @default("PENDING")
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
   customerId          String?
@@ -147,17 +149,34 @@ model Refund {
 }
 
 model Payment {
-  id        String   @id @default(uuid())
+  id        String  @id @default(uuid())
   orderId   String
   amount    Decimal
-  currency  String   @default("KES")
+  currency  String  @default("KES")
   method    String
   status    String
   reference String?
+
+  // M-Pesa specific fields
+  mpesaCheckoutRequestId String?   @unique
+  mpesaMerchantRequestId String?
+  mpesaReceiptNumber     String?   @unique
+  mpesaPhoneNumber       String?
+  mpesaTransactionDate   DateTime?
+
+  // Idempotency tracking
+  callbackProcessed Boolean   @default(false)
+  callbackAttempts  Int       @default(0)
+  lastCallbackAt    DateTime?
+
   metadata  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  order     Order    @relation(fields: [orderId], references: [id])
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  @@index([mpesaCheckoutRequestId])
+  @@index([status, createdAt])
 }
 
 model Customer {

@@ -11,37 +11,50 @@
   /* #f5f5f5 */
   --secondary-foreground: 0 0% 9%;
 
-  --accent: 24 95% 53%;
-  /* #f97316 - Orange-500 */
+  --accent: 24 98% 59%;
+  /* #FD802E - Brand Orange */
   --accent-foreground: 0 0% 100%;
 
-  /* Restaurant Palette Specifics (HSL Mapping) - Matched to Onboarding Theme */
-  --restaurant-primary-50: 0 0% 98%;
-  /* #fafafa */
-  --restaurant-primary-500: 0 0% 9%;
-  /* #171717 - Neutral-900 */
-  --restaurant-primary-600: 0 0% 0%;
-  /* #000000 */
+  /* Restaurant Palette Specifics (HSL Mapping) - Warm Hospitality Theme */
+  --restaurant-primary-50: 36 100% 98%;
+  /* Warm Cream */
+  --restaurant-primary-500: 24 10% 10%;
+  /* Warm Black/Charcoal */
+  --restaurant-primary-600: 24 10% 5%;
+  /* Deep Warm Black */
 
-  /* Secondary/Accent colors for the restaurant theme */
-  --restaurant-food-50: 33 100% 96%;
-  /* Orange-50 tint */
-  --restaurant-food-300: 32 98% 83%;
-  /* Orange-200 roughly */
-  --restaurant-food-500: 24 95% 53%;
-  /* Orange-500 */
-  --restaurant-food-600: 20 90% 48%;
-  /* Orange-600 */
+  /* Secondary/Accent colors - Roasted Orange value #FD802E */
+  --restaurant-food-50: 24 100% 97%;
+  /* Lightest tint */
+  --restaurant-food-300: 24 98% 80%;
+  /* Soft variation */
+  --restaurant-food-500: 24 98% 59%;
+  /* #FD802E - Brand Primary */
+  --restaurant-food-600: 24 98% 54%;
+  /* Slightly darker for hover */
 
-  --restaurant-neutral-50: 0 0% 98%;
-  --restaurant-neutral-100: 0 0% 96%;
-  --restaurant-neutral-200: 0 0% 90%;
-  --restaurant-neutral-300: 0 0% 83%;
-  --restaurant-neutral-400: 0 0% 64%;
-  --restaurant-neutral-500: 0 0% 45%;
-  --restaurant-neutral-600: 0 0% 32%;
-  --restaurant-neutral-700: 0 0% 25%;
-  --restaurant-neutral-900: 0 0% 9%;
+  /* Neutrals - Stone/Warm Greys (instead of cool slate) */
+  --restaurant-neutral-50: 36 30% 98%;
+  /* Off-white */
+  --restaurant-neutral-100: 36 20% 95%;
+  /* Light Beige */
+  --restaurant-neutral-200: 36 15% 90%;
+  /* Stone 200 */
+  --restaurant-neutral-300: 36 10% 83%;
+  /* Stone 300 */
+  --restaurant-neutral-400: 36 8% 64%;
+  /* Stone 400 */
+  --restaurant-neutral-500: 36 6% 45%;
+  /* Stone 500 */
+  --restaurant-neutral-600: 36 6% 32%;
+  /* Stone 600 */
+  --restaurant-neutral-700: 36 10% 25%;
+  /* Warm Charcoal */
+  --restaurant-neutral-900: 36 12% 10%;
+  /* Deep Espressso */
+
+  --restaurant-cream: 36 100% 99%;
+  /* New Utility for Backgrounds */
 
   /* Base UI Colors */
   --background: 0 0% 100%;
@@ -75,33 +88,70 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
+    --background: 24 10% 8%;
+    /* Deep Charcoal */
+    --foreground: 36 20% 95%;
+    /* Warm Off-White */
 
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
+    --card: 24 10% 10%;
+    --card-foreground: 36 20% 95%;
 
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 24 10% 10%;
+    --popover-foreground: 36 20% 95%;
 
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
+    --primary: 36 20% 95%;
+    --primary-foreground: 24 10% 10%;
 
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 24 8% 15%;
+    --secondary-foreground: 36 20% 95%;
 
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
+    --muted: 24 8% 15%;
+    --muted-foreground: 36 10% 70%;
 
-    --accent: 24 95% 53%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 24 98% 65%;
+    /* Lighter orange for dark mode contrast */
+    --accent-foreground: 24 10% 10%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 62.8% 50.6%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
+    --border: 24 8% 18%;
+    --input: 24 8% 18%;
+    --ring: 24 98% 65%;
+
+    /* Restaurant Dark Mode Palette */
+    --restaurant-cream: 24 10% 8%;
+    /* Dark background instead of cream */
+
+    --restaurant-primary-50: 24 10% 12%;
+    /* Darker shade */
+    --restaurant-primary-500: 36 20% 95%;
+    /* Light text */
+
+    --restaurant-food-50: 24 20% 18%;
+    /* Dark orange tint */
+    --restaurant-food-300: 24 95% 70%;
+    /* Lighter for visibility */
+    --restaurant-food-500: 24 98% 65%;
+    /* Brighter brand orange */
+    --restaurant-food-600: 24 98% 60%;
+    /* Slightly darker hover */
+    --restaurant-food-100: 24 40% 25%;
+    /* Dark orange bg */
+    --restaurant-food-200: 24 60% 35%;
+    /* Medium dark orange */
+
+    --restaurant-neutral-50: 24 10% 15%;
+    /* Dark stone */
+    --restaurant-neutral-100: 24 10% 18%;
+    --restaurant-neutral-200: 24 8% 22%;
+    --restaurant-neutral-300: 24 6% 35%;
+    --restaurant-neutral-400: 36 8% 55%;
+    --restaurant-neutral-500: 36 10% 70%;
+    --restaurant-neutral-600: 36 15% 80%;
+    --restaurant-neutral-700: 36 18% 85%;
+    --restaurant-neutral-900: 36 20% 95%;
+    /* Light text for dark bg */
   }
 }
 
@@ -134,6 +184,8 @@
   --color-restaurant-neutral-600: hsl(var(--restaurant-neutral-600));
   --color-restaurant-neutral-700: hsl(var(--restaurant-neutral-700));
   --color-restaurant-neutral-900: hsl(var(--restaurant-neutral-900));
+
+  --color-restaurant-cream: hsl(var(--restaurant-cream));
 
   --color-destructive: hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));

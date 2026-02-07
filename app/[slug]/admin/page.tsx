@@ -181,7 +181,16 @@ function NavItem({ icon, label, active = false }: { icon: string, label: string,
     )
 }
 
-function StatCard({ title, value, trend, trendUp, icon, type = 'default' }: any) {
+interface StatCardProps {
+    title: string;
+    value: string;
+    trend: string;
+    trendUp: boolean;
+    icon: string;
+    type?: 'default' | 'warning';
+}
+
+function StatCard({ title, value, trend, trendUp, icon, type = 'default' }: StatCardProps) {
     return (
         <div className={`p-6 rounded-2xl border shadow-sm flex flex-col justify-between h-32
             ${type === 'warning' ? 'bg-orange-50 border-orange-100' : 'bg-white border-gray-100'}`}>

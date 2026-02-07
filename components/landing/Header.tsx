@@ -45,13 +45,13 @@ export default function Header() {
                 <div className="flex items-center gap-3">
                     <ThemeToggle />
                     <Link
-                        href="/login"
+                        href="/auth/login"
                         className="hidden sm:block text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white px-4 py-2 transition-colors"
                     >
                         Login
                     </Link>
                     <Link
-                        href="/signup"
+                        href="/auth/login?mode=register"
                         className="bg-black dark:bg-white text-white dark:text-black px-6 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800 dark:hover:bg-gray-100 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-black/10 dark:shadow-white/5"
                     >
                         Start Free Trial

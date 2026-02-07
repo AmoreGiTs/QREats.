@@ -11,25 +11,25 @@ export default function HeroSection() {
     const [isPlaying, setIsPlaying] = useState(true);
 
     return (
-        <section className="relative min-h-svh flex items-center pt-24 md:pt-28 pb-20 overflow-hidden bg-white dark:bg-gray-950 transition-colors duration-300">
-            {/* Background Elements */}
-            <div className="absolute inset-0 z-0">
-                <div className="absolute top-0 right-0 w-1/2 h-full bg-linear-to-bl from-orange-50/50 to-transparent rounded-bl-[100px]" />
-                <div className="absolute bottom-0 left-0 w-1/3 h-1/2 bg-linear-to-tr from-blue-50/30 to-transparent rounded-tr-[100px]" />
+        <section className="relative min-h-svh flex items-center pt-24 md:pt-28 pb-20 overflow-hidden bg-restaurant-cream dark:bg-restaurant-neutral-900 transition-colors duration-300">
+            {/* Organic Background Elements */}
+            <div className="absolute inset-0 z-0 opacity-60">
+                <div className="absolute top-[-10%] right-[-5%] w-[60%] h-[70%] bg-restaurant-food-300/20 rounded-full blur-3xl" />
+                <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[60%] bg-restaurant-food-500/10 rounded-full blur-3xl" />
             </div>
 
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <div className="grid lg:grid-cols-2 gap-12 md:gap-16 items-center">
                     <div className="max-w-2xl">
-                        {/* Badge */}
+                        {/* Marketing Tag */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 dark:bg-orange-900/30 border border-orange-200 dark:border-orange-800 mb-8"
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-restaurant-food-500 text-white shadow-lg shadow-restaurant-food-500/30 dark:shadow-restaurant-food-500/50 mb-8 border border-white/20"
                         >
-                            <Sparkles className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-                            <span className="text-xs font-bold text-orange-800 dark:text-orange-200 uppercase tracking-wider">
-                                Now serving 500+ restaurants
+                            <Sparkles className="w-4 h-4 text-white fill-white" />
+                            <span className="text-xs font-black uppercase tracking-widest">
+                                #1 Restaurant OS in Kenya
                             </span>
                         </motion.div>
 
@@ -38,11 +38,11 @@ export default function HeroSection() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.1 }}
-                            className="text-5xl sm:text-6xl md:text-7xl font-black text-gray-900 dark:text-white mb-6 leading-[1.1] tracking-tight"
+                            className="text-5xl sm:text-6xl md:text-7xl font-display font-black text-restaurant-neutral-900 dark:text-restaurant-neutral-900 mb-6 leading-[1.05] tracking-tight"
                         >
-                            The OS for
-                            <span className="block text-transparent bg-clip-text bg-linear-to-r from-orange-500 to-red-600 pb-2">
-                                Modern Dining
+                            Turn Tables
+                            <span className="block text-restaurant-food-500">
+                                3x Faster.
                             </span>
                         </motion.h1>
 
@@ -51,10 +51,9 @@ export default function HeroSection() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2 }}
-                            className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 mb-10 leading-relaxed max-w-lg"
+                            className="text-lg sm:text-xl text-restaurant-neutral-600 dark:text-restaurant-neutral-500 mb-10 leading-relaxed max-w-lg font-sans font-medium"
                         >
-                            QREats streamlines your restaurant operations from QR ordering to
-                            AI-powered inventory. Increase efficiency by 40% and revenue by 25%.
+                            The all-in-one platform for modern hospitality. QR ordering, inventory tracking, and M-Pesa payments—unified.
                         </motion.p>
 
                         {/* Buttons */}
@@ -65,85 +64,58 @@ export default function HeroSection() {
                             className="flex flex-wrap gap-4"
                         >
                             <Link
-                                href="/signup"
-                                className="group inline-flex items-center gap-2 px-8 py-4 bg-orange-600 text-white rounded-2xl font-bold shadow-xl shadow-orange-200 hover:bg-orange-700 hover:scale-[1.02] transition-all active:scale-95"
+                                href="/auth/login?mode=register"
+                                className="group inline-flex items-center gap-2 px-8 py-4 bg-restaurant-food-500 text-white rounded-2xl font-bold shadow-xl shadow-restaurant-food-500/40 hover:bg-restaurant-food-600 hover:scale-[1.02] transition-all active:scale-95"
                             >
                                 Start Free Trial
                                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                             </Link>
-                            <button className="group inline-flex items-center gap-2 px-8 py-4 bg-white border-2 border-gray-100 text-gray-900 rounded-2xl font-bold hover:bg-gray-50 hover:border-gray-200 transition-all active:scale-95">
-                                <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center group-hover:bg-orange-200 transition-colors">
-                                    <Play className="w-4 h-4 text-orange-600 fill-orange-600" />
+                            <button className="group inline-flex items-center gap-2 px-8 py-4 bg-white border-2 border-restaurant-neutral-200 text-restaurant-neutral-700 rounded-2xl font-bold hover:bg-restaurant-neutral-50 hover:border-restaurant-neutral-300 transition-all active:scale-95 shadow-sm">
+                                <div className="w-8 h-8 rounded-full bg-restaurant-food-50 flex items-center justify-center group-hover:bg-restaurant-food-300/30 transition-colors">
+                                    <Play className="w-4 h-4 text-restaurant-food-500 fill-restaurant-food-500" />
                                 </div>
-                                Book a Demo
+                                View Demo
                             </button>
                         </motion.div>
                     </div>
 
                     {/* Hero Visual / "Video" */}
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.9, rotate: 2 }}
+                        initial={{ opacity: 0, scale: 0.95, rotate: 1 }}
                         animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                        transition={{ delay: 0.4, duration: 0.8 }}
+                        transition={{ delay: 0.4, duration: 1, type: "spring" }}
                         className="relative"
                     >
-                        <div className="relative aspect-square md:aspect-4/3 bg-gray-900 rounded-[40px] shadow-2xl overflow-hidden border-8 border-gray-800 flex items-center justify-center p-8 sm:p-12">
-                            {/* Futuristic Video Player Background */}
+                        <div className="relative aspect-square md:aspect-4/3 bg-restaurant-neutral-900 rounded-[40px] shadow-2xl shadow-restaurant-neutral-900/20 overflow-hidden border-[6px] border-white flex items-center justify-center p-8 sm:p-12 ring-1 ring-restaurant-neutral-200">
+                            {/* Cinematic Background */}
                             <div className="absolute inset-0">
-                                {/* Background Image with Overlay */}
-                                {/* Background Image with Overlay */}
                                 <Image
                                     src="/hero-bg.jpg"
-                                    alt="Hero background"
+                                    alt="Fine dining atmosphere"
                                     fill
-                                    className="object-cover"
+                                    className="object-cover opacity-80"
                                     priority
                                     quality={90}
                                 />
-                                <div className="absolute inset-0 bg-linear-to-br from-gray-900/90 via-gray-900/70 to-black/90" />
-
-                                {/* Animated Grid Overlay */}
-                                <motion.div
-                                    className="absolute inset-0 opacity-20"
-                                    style={{
-                                        backgroundImage: `linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-                                                         linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)`,
-                                        backgroundSize: '50px 50px'
-                                    }}
-                                    animate={{
-                                        backgroundPosition: ['0px 0px', '50px 50px']
-                                    }}
-                                    transition={{
-                                        duration: 20,
-                                        repeat: Infinity,
-                                        ease: "linear"
-                                    }}
-                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-restaurant-neutral-900 via-restaurant-neutral-900/40 to-transparent" />
                             </div>
 
                             {/* Center Content - Interactive Logo */}
                             <div className="relative z-10 flex flex-col items-center justify-center">
-                                <AnimatedLogo
-                                    size="hero"
-                                    variant="hero"
-                                    isPlaying={isPlaying}
-                                />
-
-                                <motion.p
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{ delay: 1 }}
-                                    className="mt-8 text-xl font-bold text-gray-400 tracking-widest uppercase"
-                                >
-                                    Restaurant OS
-                                </motion.p>
+                                <div className="p-6 bg-white/10 backdrop-blur-md rounded-3xl border border-white/20 shadow-2xl">
+                                    <AnimatedLogo
+                                        size="hero"
+                                        variant="hero"
+                                        isPlaying={isPlaying}
+                                    />
+                                </div>
                             </div>
 
                             {/* Play/Pause Control */}
                             <div className="absolute bottom-8 right-8 z-20">
                                 <button
                                     onClick={() => setIsPlaying(!isPlaying)}
-                                    className="w-14 h-14 bg-white rounded-full shadow-lg border border-gray-100 flex items-center justify-center text-orange-600 hover:scale-110 active:scale-95 transition-all"
+                                    className="w-14 h-14 bg-white/90 backdrop-blur-sm rounded-full shadow-lg border border-white/50 flex items-center justify-center text-restaurant-food-600 hover:scale-110 active:scale-95 transition-all"
                                 >
                                     {isPlaying ? (
                                         <Pause className="w-6 h-6 fill-current" />
@@ -154,19 +126,22 @@ export default function HeroSection() {
                             </div>
                         </div>
 
-                        {/* Floating Elements - Revenue Stats */}
+                        {/* Floating Stats Card - Refined */}
                         <motion.div
-                            animate={{ y: [0, -20, 0] }}
-                            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                            className="absolute -top-6 -right-6 p-6 bg-white rounded-3xl shadow-xl border border-gray-100 hidden md:block z-30"
+                            animate={{ y: [0, -15, 0] }}
+                            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                            className="absolute -top-6 -right-6 p-5 bg-white rounded-2xl shadow-xl shadow-restaurant-neutral-500/10 border border-restaurant-neutral-100 hidden md:block z-30"
                         >
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-                                    <span className="text-green-600 font-bold">↑</span>
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-xl bg-restaurant-food-50 flex items-center justify-center">
+                                    <Sparkles className="w-6 h-6 text-restaurant-food-600" />
                                 </div>
                                 <div>
-                                    <div className="text-xs text-gray-500 font-semibold mb-1">REVENUE INCREASE</div>
-                                    <div className="text-xl font-black text-gray-900">+24.8%</div>
+                                    <div className="text-[10px] text-restaurant-neutral-500 font-bold tracking-wider uppercase mb-1">Monthly Revenue</div>
+                                    <div className="text-xl font-display font-bold text-restaurant-neutral-900 flex items-center gap-2">
+                                        KES 4.2M
+                                        <span className="text-xs px-1.5 py-0.5 bg-green-100 text-green-700 rounded-md font-bold">+18%</span>
+                                    </div>
                                 </div>
                             </div>
                         </motion.div>

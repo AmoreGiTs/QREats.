@@ -26,12 +26,12 @@ const TESTIMONIALS = [
 
 export default function TestimonialsSection() {
     return (
-        <section className="py-24 bg-white">
+        <section className="py-24 bg-white dark:bg-restaurant-cream transition-colors duration-300">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center max-w-3xl mx-auto mb-20">
-                    <h2 className="text-4xl font-black text-gray-900 mb-6 font-display">
+                    <h2 className="text-4xl font-black text-restaurant-neutral-900 mb-6 font-display">
                         Trusted by Kenya's <br />
-                        <span className="text-orange-600">Leading Restaurants</span>
+                        <span className="text-restaurant-food-500">Leading Restaurants</span>
                     </h2>
                 </div>
 
@@ -43,21 +43,21 @@ export default function TestimonialsSection() {
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
                             transition={{ delay: i * 0.1 }}
-                            className="p-10 rounded-[40px] bg-gray-50 border border-gray-100 relative group hover:bg-orange-50 hover:border-orange-100 transition-all"
+                            className="p-10 rounded-[40px] bg-restaurant-neutral-50 dark:bg-restaurant-neutral-100 border border-restaurant-neutral-100 dark:border-restaurant-neutral-200 relative group hover:bg-restaurant-food-50 dark:hover:bg-restaurant-food-50/30 hover:border-restaurant-food-300 transition-all"
                         >
-                            <div className="absolute -top-4 left-10 p-4 bg-orange-600 rounded-2xl shadow-lg shadow-orange-200 group-hover:scale-110 transition-transform">
+                            <div className="absolute -top-4 left-10 p-4 bg-restaurant-food-500 rounded-2xl shadow-lg shadow-restaurant-food-500/40 group-hover:scale-110 transition-transform">
                                 <Quote className="text-white w-6 h-6 fill-white" />
                             </div>
 
-                            <p className="text-lg text-gray-700 font-medium leading-relaxed mb-8 pt-4 italic">
+                            <p className="text-lg text-restaurant-neutral-700 font-medium leading-relaxed mb-8 pt-4 italic font-sans">
                                 "{t.content}"
                             </p>
 
                             <div className="flex items-center gap-4">
-                                <img src={t.avatar} alt={t.author} className="w-14 h-14 rounded-2xl bg-white p-1 border border-gray-100" />
+                                <img src={t.avatar} alt={t.author} className="w-14 h-14 rounded-2xl bg-white p-1 border border-restaurant-neutral-200" />
                                 <div>
-                                    <div className="font-bold text-gray-900">{t.author}</div>
-                                    <div className="text-sm text-gray-500 font-semibold">{t.role}</div>
+                                    <div className="font-bold text-restaurant-neutral-900 font-display">{t.author}</div>
+                                    <div className="text-sm text-restaurant-neutral-500 font-semibold">{t.role}</div>
                                 </div>
                             </div>
                         </motion.div>

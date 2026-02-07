@@ -2,12 +2,17 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
-export default async function proxy(request: NextRequest) {
+export default async function middleware(request: NextRequest) {
     const url = request.nextUrl;
     let hostname = request.headers.get('host')!;
 
-    // Handle localhost for dev
-    if (hostname.includes('localhost') || hostname.includes('127.0.0.1')) {
+    // Handle localhost and local network IPs for dev
+    if (
+        hostname.includes('localhost') ||
+        hostname.includes('127.0.0.1') ||
+        hostname.startsWith('192.168.') ||
+        hostname.startsWith('10.')
+    ) {
         const response = NextResponse.next();
         response.headers.set('x-pathname', url.pathname);
         return response;

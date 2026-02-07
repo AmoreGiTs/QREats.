@@ -28,7 +28,7 @@ export function KitchenBoard({ initialOrders, restaurantId, slug }: { initialOrd
     // Real-time listener
     useEffect(() => {
         if (!socket.connected) socket.connect();
-        
+
         socket.emit('join-room', slug);
 
         socket.on('order:new', (newOrder) => {
@@ -36,8 +36,8 @@ export function KitchenBoard({ initialOrders, restaurantId, slug }: { initialOrd
             // Since newOrder comes with data, we could optimistically add it,
             // but for simplicity and consistency with RSC, we just refresh.
             // A better approach would be to append to state if the shape matches.
-            router.refresh(); 
-            
+            router.refresh();
+
             // Play notification sound
             const audio = new Audio('/sounds/ding.mp3'); // We'll need to add this or ignore if missing
             audio.play().catch(e => console.log('Audio play failed', e));
@@ -92,7 +92,16 @@ export function KitchenBoard({ initialOrders, restaurantId, slug }: { initialOrd
     );
 }
 
-function Column({ title, orders, color, onAction, actionLabel, actionColor }: any) {
+interface ColumnProps {
+    title: string;
+    orders: Order[];
+    color: string;
+    onAction: (id: string) => void;
+    actionLabel: string;
+    actionColor: string;
+}
+
+function Column({ title, orders, color, onAction, actionLabel, actionColor }: ColumnProps) {
     return (
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl flex flex-col h-full">
             <div className={`p-4 font-bold text-lg bg-zinc-950 rounded-t-xl border-b border-zinc-800 ${color} flex justify-between`}>

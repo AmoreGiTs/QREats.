@@ -35,7 +35,7 @@ export default function CTASection() {
 
                     <div className="flex flex-col sm:flex-row gap-6 justify-center">
                         <Link
-                            href="/signup"
+                            href="/auth/login?mode=register"
                             className="px-10 py-5 bg-white text-orange-600 rounded-[32px] font-black text-xl shadow-2xl shadow-black/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3"
                         >
                             Start Free Trial

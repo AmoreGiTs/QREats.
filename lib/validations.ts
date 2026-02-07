@@ -18,10 +18,16 @@ export const OrderItemSchema = z.object({
 export type OrderItemInput = z.infer<typeof OrderItemSchema>;
 
 export const CreateOrderSchema = z.object({
-  restaurantId: z.string().uuid(),
+  restaurantId: z.string(),
   totalAmount: z.number().nonnegative(),
   items: z.array(OrderItemSchema).min(1),
-  tableId: z.union([z.string(), z.number()]).optional(),
+  tableId: z.string().optional(),
+  customer: z.object({
+    phone: z.string().min(10),
+    name: z.string().optional(),
+    email: z.string().email().optional()
+  }).optional(),
+  paymentMethod: z.enum(['MPESA', 'CASH', 'CARD']).optional()
 });
 
 export type CreateOrderInput = z.infer<typeof CreateOrderSchema>;
