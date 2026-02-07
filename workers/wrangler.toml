@@ -1,0 +1,14 @@
+name = "qreats-edge"
+main = "edge-router.ts"
+compatibility_date = "2024-01-01"
+
+[vars]
+API_URL = "https://your-production-api.com"
+CACHE_TTL = "300"
+
+[[routes]]
+pattern = "api.qreats.co.ke/*"
+zone_name = "qreats.co.ke"
+
+[observability]
+enabled = true

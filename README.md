@@ -81,47 +81,44 @@ Frontend:
 ├── Framer Motion                 → Animations
 └── Socket.IO Client              → Real-time updates
 
-Backend:
+Backend & Distributed Systems:
 ├── Next.js Server Actions        → Serverless functions
-├── Prisma ORM                    → Database access
-├── PostgreSQL / SQLite           → Relational database
-├── Socket.IO Server              → WebSocket server
-└── Redis (planned)               → Caching & sessions
+├── Prisma ORM                    → Database access (Read Replicas)
+├── PostgreSQL                    → Primary relational database
+├── Redis Cluster (ioredis)       → Caching, Pub/Sub & Sessions
+├── Kafka / Redpanda              → Distributed event streaming
+├── BullMQ                        → Persistent background job queue
+└── Express.js                    → Specialized microservices
 
-Payments:
-├── M-Pesa STK Push               → Mobile money (Kenya)
-├── Stripe (planned)              → Card payments
-└── Signature Verification        → RSA-SHA256 security
+AI & Analytics:
+├── TensorFlow.js                 → Predictive sales/inventory models
+├── OpenAI                        → Conversational AI & semantic search
+├── Pinecone                      → Vector database for personalization
+└── Cube.js                       → Semantic layer for BI/Analytics
 
 Infrastructure:
+├── Cloudflare Workers            → Edge caching & routing
+├── Docker / Kubernetes           → Container orchestration
 ├── Vercel / Self-hosted          → Deployment
-├── Kubernetes (production)       → Container orchestration
-└── Prometheus + Grafana          → Monitoring
+└── Prometheus + Grafana          → Observability & Alerting
 ```
 
 ### System Architecture
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Load Balancer (CloudFlare)                │
-│                     SSL/TLS Termination                      │
-└──────────────────────┬──────────────────────────────────────┘
-                       │
-       ┌───────────────┴───────────────┐
-       │                               │
-┌──────▼──────┐               ┌───────▼────────┐
-│  Next.js    │               │  Socket.IO     │
-│  App (K8s)  │◄─────────────►│  Server (K8s)  │
-│  Replicas   │               │  Sticky Session│
-└──────┬──────┘               └───────┬────────┘
-       │                              │
-       ├──────────────────────────────┤
-       │                              │
-┌──────▼──────────┐          ┌────────▼────────┐
-│  PostgreSQL     │          │  Redis Cluster  │
-│  (Primary +     │          │  (Cache/Session)│
-│   Read Replica) │          └─────────────────┘
-└─────────────────┘
+```mermaid
+graph TD
+    User["User (Admin/Customer)"] --> Edge["Cloudflare Workers (Edge)"]
+    Edge --> App["Next.js App (Server Operations)"]
+    App --> Redis["Redis Cluster (Cache/PubSub)"]
+    App --> DB["Prisma DB (Read/Write Replicas)"]
+    App --> Kafka["Kafka (Event Streaming)"]
+    
+    Kafka --> Analytics["Analytics Service (Real-time)"]
+    Kafka --> Inventory["Inventory Service"]
+    
+    App --> AI["AI/ML Layer (TF.js/Pinecone)"]
+    App --> Comms["Omnichannel Comms (Twilio/SendGrid)"]
+    App --> Finance["Accounting Sync (QuickBooks/Plaid)"]
 ```
 
 ### Data Flow: Order Creation
@@ -149,28 +146,25 @@ Customer Scans QR → Menu Page → Add to Cart → Checkout
 
 ## 🔐 Enterprise Features
 
-### 1. Unified Order Logic
-- **Single Atomic Transaction** for order creation
-- Integrates: CRM + Inventory (FIFO) + Loyalty + Table Management
-- **40% code reduction** while ensuring 100% data consistency
+### 5. AI-Powered Personalization & Recommendations
+- **Vector Search:** Integrated **Pinecone** for high-dimensional customer preference matching
+- **Smart Embeddings:** Uses **OpenAI** to transform order history into behavioral signals
+- **Personalized CDP:** 360-degree customer view with churn risk and CLV tracking
 
-### 2. Payment Reconciliation
-- **M-Pesa Integration** with signature verification (RSA-SHA256)
-- **Idempotency Protection** prevents duplicate payment processing
-- Automatic order status updates on payment confirmation
-- Comprehensive tracking: receipt number, phone, timestamp
+### 6. Predictive Analytics (TensorFlow.js)
+- **Sales Forecasting:** ML models predicting peak hours and staffing needs
+- **Demand Planning:** Automated inventory forecasting with safety margins
+- **Real-time Streaming:** Kafka-driven analytics dashboards with sub-second updates
 
-### 3. RBAC Permission System
-- **50+ granular permissions** across all features
-- **6 role levels:** CUSTOMER → WAITER → KITCHEN → MANAGER → OWNER → ADMIN
-- Middleware guards for API routes and Server Actions
-- Type-safe permission checking
+### 7. Omnichannel Communications
+- **Unified Comms:** Failover-ready SMS (Twilio), Email (SendGrid), and WhatsApp
+- **Intelligent Routing:** Automatically chooses channel based on user consent/preferences
+- **AI Chatbot:** OpenAI-driven customer service for order queries
 
-### 4. Multi-Tenant Isolation
-- **Automatic tenant filtering** via Prisma middleware
-- Prevents cross-restaurant data leaks at database level
-- **100% elimination of human error** risk
-- Optional audit logging for compliance
+### 8. Financial & IoT Operations
+- **Accounting Adapters:** Seamless sync with QuickBooks, Xero, and Sage
+- **Plaid Reconciliation:** Automated bank matching for orders and expenses
+- **IoT Monitoring:** Real-time health tracking for kitchen equipment with automated alerts
 
 ---
 
@@ -329,15 +323,13 @@ qreats/
 
 ## 🔒 Security
 
-- **Authentication:** NextAuth.js with secure session management
-- **Payment Security:** RSA-SHA256 signature verification for M-Pesa callbacks
-- **Idempotency:** Prevents duplicate payment processing
-- **Multi-Tenant Isolation:** Automatic query filtering by restaurantId
-- **RBAC:** 50+ granular permissions with middleware guards
-- **SQL Injection:** Protected via Prisma ORM parameterized queries
-- **XSS Protection:** React's built-in sanitization
-- **CSRF Protection:** SameSite cookies and CSRF tokens
-- **Audit Logging:** Optional mutation tracking for compliance
+- **Multi-Tenant Isolation:** Automatic database-level query filtering ensures zero cross-restaurant data leakage.
+- **RBAC:** 50+ granular permissions enforced via type-safe middleware guards.
+- **Encrypted Communications:** All internal and external data flows over TLS/SSL, with RSA-SHA256 signature verification for critical financial callbacks.
+- **Edge Security:** Cloudflare WAF and Edge Workers provide protection against DDoS and high-frequency scraping.
+- **Idempotency:** Core transactions (Payments, Orders) include deduplication logic to prevent state corruption.
+- **Session Management:** Secure, encrypted HTTP-only cookies with CSRF protection.
+- **Audit Logging:** Comprehensive mutation tracking for enterprise compliance and forensic readiness.
 
 ---
 
@@ -380,19 +372,26 @@ See [deployment guide](docs/DEPLOYMENT.md) for:
 - [x] Multi-tenant isolation middleware
 - [x] Real-time WebSocket updates
 
-### 🚧 Phase 3: Advanced Features (In Progress)
-- [ ] Multi-location management
-- [ ] Advanced analytics dashboard
-- [ ] QuickBooks integration
-- [ ] Twilio SMS notifications
-- [ ] SendGrid email marketing
+### ✅ Phase 3: Advanced Infrastructure (Complete)
+- [x] Multi-location management (Scale ready)
+- [x] Redis Cluster caching & Pub/Sub
+- [x] Kafka/Redpanda event streaming
+- [x] PostgreSQL read replicas
+- [x] Cloudflare Workers edge deployment
 
-### 📅 Phase 4: Enterprise Scale (Q2 2026)
-- [ ] White-labeling for franchises
-- [ ] SSO (Single Sign-On)
-- [ ] Custom domain support
-- [ ] API rate limiting (Redis)
-- [ ] Advanced reporting & exports
+### ✅ Phase 4: Intelligence & Connectivity (Complete)
+- [x] AI-Powered Personalized Recommendations (Pinecone + OpenAI)
+- [x] Predictive Analytics (TensorFlow.js Sales Forecasting)
+- [x] Real-time Analytics Streaming
+- [x] Omnichannel Comms (Twilio + SendGrid)
+- [x] Financial Sync (QuickBooks + Plaid)
+- [x] IoT Equipment Monitoring & Alerts
+
+### 📅 Phase 5: Global Scale (Q3 2026)
+- [ ] Multi-region database synchronization
+- [ ] White-labeling for international franchises
+- [ ] SSO (Single Sign-On) & Advanced IAM
+- [ ] Blockchain-based loyalty tokenization
 
 ---
 

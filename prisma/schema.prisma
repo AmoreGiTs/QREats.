@@ -17,11 +17,38 @@ model Restaurant {
   auditLogs      AuditLog[]
   customers      Customer[]
   inventoryItems InventoryItem[]
+  locations      Location[]
   menuItems      MenuItem[]
   orders         Order[]
   reservations   Reservation[]
   tables         Table[]
   users          User[]
+}
+
+model Location {
+  id           String  @id @default(uuid())
+  restaurantId String
+  name         String
+  address      String
+  phone        String?
+  timezone     String  @default("Africa/Nairobi")
+  isActive     Boolean @default(true)
+
+  // Operational hours
+  openingTime String?
+  closingTime String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  restaurant     Restaurant      @relation(fields: [restaurantId], references: [id])
+  tables         Table[]
+  staff          User[]
+  inventoryItems InventoryItem[]
+  orders         Order[]
+
+  @@index([restaurantId, isActive])
 }
 
 model User {
@@ -32,12 +59,14 @@ model User {
   phone         String?
   role          String      @default("WAITER")
   restaurantId  String?
+  locationId    String?
   image         String?
   emailVerified DateTime?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   auditLogs     AuditLog[]
   sessions      Session[]
+  location      Location?   @relation(fields: [locationId], references: [id])
   restaurant    Restaurant? @relation(fields: [restaurantId], references: [id])
 }
 
@@ -69,7 +98,9 @@ model InventoryItem {
   name         String
   unit         String
   restaurantId String
+  locationId   String?
   batches      InventoryBatch[]
+  location     Location?              @relation(fields: [locationId], references: [id])
   restaurant   Restaurant             @relation(fields: [restaurantId], references: [id])
   transactions InventoryTransaction[]
   recipes      Recipe[]
@@ -112,6 +143,7 @@ model Recipe {
 model Order {
   id                  String               @id @default(uuid())
   restaurantId        String
+  locationId          String?
   status              String               @default("PENDING")
   totalAmount         Decimal
   paymentMethod       String               @default("CASH")
@@ -121,6 +153,7 @@ model Order {
   customerId          String?
   tableId             String?
   loyaltyTransactions LoyaltyTransaction[]
+  location            Location?            @relation(fields: [locationId], references: [id])
   table               Table?               @relation(fields: [tableId], references: [id])
   customer            Customer?            @relation(fields: [customerId], references: [id])
   restaurant          Restaurant           @relation(fields: [restaurantId], references: [id])
@@ -185,12 +218,30 @@ model Customer {
   phone               String?
   email               String?
   name                String?
+  firstName           String?
+  lastName            String?
   loyaltyPoints       Int                  @default(0)
   visitsCount         Int                  @default(0)
+  averageOrderValue   Decimal              @default(0)
+  lifetimeValue       Decimal              @default(0)
+  churnRisk           Float?
+  
+  // Enterprise fields
+  segment             String?               // VIP, REGULAR, AT_RISK, CHURNED
+  preferences         String?               // JSON string: {"dietaryRestrictions": [], "favoriteItems": []}
+  tags                String?               // JSON string: ["vegetarian", "lunch-regular"]
+  
+  // Marketing & GDPR
+  emailOptIn          Boolean               @default(true)
+  smsOptIn            Boolean               @default(true)
+  whatsappOptIn       Boolean               @default(false)
+  preferencesUpdatedAt DateTime?
+  
   createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
   birthDate           DateTime?
   lastVisitAt         DateTime?
-  preferences         String?
+  
   restaurant          Restaurant           @relation(fields: [restaurantId], references: [id])
   loyaltyTransactions LoyaltyTransaction[]
   orders              Order[]
@@ -198,6 +249,8 @@ model Customer {
 
   @@unique([restaurantId, phone])
   @@unique([restaurantId, email])
+  @@index([restaurantId, lifetimeValue])
+  @@index([restaurantId, segment])
 }
 
 model Table {
@@ -206,10 +259,12 @@ model Table {
   capacity     Int
   status       String        @default("AVAILABLE")
   restaurantId String
+  locationId   String?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   orders       Order[]
   reservations Reservation[]
+  location     Location?     @relation(fields: [locationId], references: [id])
   restaurant   Restaurant    @relation(fields: [restaurantId], references: [id])
 
   @@unique([restaurantId, number])

@@ -23,12 +23,37 @@ const prismaClientSingleton = () => {
   return client;
 };
 
+// Read Client Singleton (for replicas)
+const readPrismaClientSingleton = () => {
+  return new PrismaClient({
+    datasources: {
+      db: {
+        url: process.env.DATABASE_READ_URL || process.env.DATABASE_URL,
+      },
+    },
+    log: ['error'],
+  });
+};
+
 declare global {
   var prisma: undefined | ReturnType<typeof prismaClientSingleton>;
+  var readPrisma: undefined | ReturnType<typeof readPrismaClientSingleton>;
 }
 
 const prisma = globalThis.prisma ?? prismaClientSingleton();
+const readPrisma = globalThis.readPrisma ?? readPrismaClientSingleton();
+
+/**
+ * Helper to run queries on the read replica
+ */
+export async function useReadReplica<T>(fn: (client: typeof readPrisma) => Promise<T>): Promise<T> {
+  return fn(readPrisma);
+}
 
 export default prisma;
+export { readPrisma };
 
-if (process.env.NODE_ENV !== 'production') globalThis.prisma = prisma;
+if (process.env.NODE_ENV !== 'production') {
+  globalThis.prisma = prisma;
+  globalThis.readPrisma = readPrisma;
+}

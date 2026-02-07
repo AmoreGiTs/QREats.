@@ -23,6 +23,9 @@ export type CreateOrderInput = {
     paymentMethod?: 'MPESA' | 'CASH' | 'CARD';
 };
 
+import { eventProducer } from '@/lib/events/producer';
+import { EventType } from '@/lib/events/types';
+
 /**
  * Unified Order Creation
  * Handles: Order creation, Inventory (FIFO), CRM, Loyalty Points, Table Management
@@ -150,6 +153,11 @@ export async function createOrder(input: CreateOrderInput) {
             }
 
             return newOrder;
+        });
+
+        // 6. Emit Order Created Event (Async, non-blocking for the user)
+        eventProducer.publishOrderEvent(EventType.ORDER_CREATED, result).catch(err => {
+            console.error('Failed to emit ORDER_CREATED event:', err);
         });
 
         revalidatePath(`/${restaurantId}/orders`);
